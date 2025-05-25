@@ -8,6 +8,9 @@ public class UberShaderGUI : ShaderGUI
         Material material = materialEditor.target as Material;
 
         // Find all properties
+        MaterialProperty baseMap = FindProperty("_BaseMap", props);
+        MaterialProperty baseColor = FindProperty("_BaseColor", props);
+
         MaterialProperty useNormalMap = FindProperty("_UseNormalMap", props);
         MaterialProperty normalMap = FindProperty("_NormalMap", props);
         MaterialProperty normalStrength = FindProperty("_NormalStrength", props);
@@ -16,6 +19,10 @@ public class UberShaderGUI : ShaderGUI
         MaterialProperty metallicMap = FindProperty("_MetallicMap", props);
         MaterialProperty metallicColor = FindProperty("_MetallicColor", props);
         MaterialProperty metallic = FindProperty("_Metallic", props);
+
+        MaterialProperty roughnessMap = FindProperty("_RoughnessMap", props);
+        MaterialProperty roughness = FindProperty("_Roughness", props);
+        MaterialProperty smoothness = FindProperty("_Smoothness", props);
 
         MaterialProperty enableEmission = FindProperty("_EnableEmission", props);
         MaterialProperty emissionMap = FindProperty("_EmissionMap", props);
@@ -29,34 +36,61 @@ public class UberShaderGUI : ShaderGUI
         MaterialProperty alphaTest = FindProperty("_AlphaTest", props);
         MaterialProperty cutoff = FindProperty("_Cutoff", props);
 
-        // Draw base GUI
-        materialEditor.PropertiesDefaultGUI(props);
+        // Header styles
+        GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel);
+        headerStyle.fontSize = 12;
 
-        // Normal Map
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Base Properties", headerStyle);
+        EditorGUI.indentLevel++;
+        materialEditor.TexturePropertySingleLine(new GUIContent("Base Map"), baseMap, baseColor);
+        EditorGUI.indentLevel--;
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Normal Mapping", headerStyle);
+        EditorGUI.indentLevel++;
         DrawToggle(materialEditor, material, useNormalMap, "_USENORMALMAP");
         if (useNormalMap.floatValue == 1)
         {
             materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map"), normalMap);
             materialEditor.ShaderProperty(normalStrength, "Normal Strength");
         }
+        EditorGUI.indentLevel--;
 
-        // Metallic
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("PBR Properties", headerStyle);
+        EditorGUI.indentLevel++;
         DrawToggle(materialEditor, material, useMetallic, "_USEMETALLICWORKFLOW");
         if (useMetallic.floatValue == 1)
         {
+            EditorGUILayout.LabelField("Metallic", EditorStyles.miniBoldLabel);
             materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map"), metallicMap);
             materialEditor.ShaderProperty(metallicColor, "Metallic Tint");
             materialEditor.ShaderProperty(metallic, "Metallic");
-        }
 
-        // Emission
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("Roughness", EditorStyles.miniBoldLabel);
+            materialEditor.TexturePropertySingleLine(new GUIContent("Roughness Map"), roughnessMap);
+            materialEditor.ShaderProperty(roughness, "Roughness");
+
+            EditorGUILayout.HelpBox("Tip: Use a packed texture with Metallic in R channel and Roughness in G channel for efficiency.", MessageType.Info);
+        }
+        else
+        {
+            materialEditor.ShaderProperty(smoothness, "Smoothness");
+        }
+        EditorGUI.indentLevel--;
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Emission", headerStyle);
+        EditorGUI.indentLevel++;
         DrawToggle(materialEditor, material, enableEmission, "_ENABLEEMISSION");
         if (enableEmission.floatValue == 1)
         {
-            materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map"), emissionMap);
-            materialEditor.ShaderProperty(emissionColor, "Emission Color");
+            materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map"), emissionMap, emissionColor);
             materialEditor.ShaderProperty(emissionStrength, "Emission Strength");
 
+            EditorGUILayout.Space(5);
             DrawToggle(materialEditor, material, enablePulse, "_ENABLEPULSE");
             if (enablePulse.floatValue == 1)
             {
@@ -64,13 +98,26 @@ public class UberShaderGUI : ShaderGUI
                 materialEditor.ShaderProperty(pulseIntensity, "Pulse Intensity");
             }
         }
+        EditorGUI.indentLevel--;
 
-        // Alpha Test
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Transparency", headerStyle);
+        EditorGUI.indentLevel++;
         DrawToggle(materialEditor, material, alphaTest, "_ALPHATEST_ON");
         if (alphaTest.floatValue == 1)
         {
             materialEditor.ShaderProperty(cutoff, "Alpha Cutoff");
         }
+        EditorGUI.indentLevel--;
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Material Usage Tips", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox(
+            "• Diffuse Map: Use _BaseMap for your main texture\n" +
+            "• Metallic Map: Red channel for metallic values (0=dielectric, 1=metal)\n" +
+            "• Roughness Map: Single channel texture (0=mirror, 1=rough)\n" +
+            "• For packed textures: Metallic(R), Roughness(G), AO(B)",
+            MessageType.Info);
     }
 
     private void DrawToggle(MaterialEditor editor, Material mat, MaterialProperty prop, string keyword)

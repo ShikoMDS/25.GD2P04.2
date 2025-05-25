@@ -7,23 +7,19 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UberShaderMat Glass
+  m_Name: Uber Panel B
   m_Shader: {fileID: 4800000, guid: 3b5a3ec88e5bd48488dcef7c14d49ffe, type: 3}
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
-  m_ModifiedSerializedProperties: 8
+  m_ModifiedSerializedProperties: 12
   m_ValidKeywords:
-  - _ALPHATEST_ON
-  - _USEMETALLICWORKFLOW
-  - _USENORMALMAP
+  - _USE_EMISSION
   m_InvalidKeywords:
   - _CULLMODE_BACK
-  - _ENABLENORMAL_ON
   - _RENDERMODE_OPAQUE
   - _USEMETALLICWORKFLOW_ON
-  - _USENORMALMAP_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
+  m_DoubleSidedGI: 1
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
@@ -32,33 +28,26 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 7370fb7604e5fc742af44f7577732632, type: 3}
+        m_Texture: {fileID: 2800000, guid: 8acfaae37544bbb41a1ef4eadbcd9f0a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 7370fb7604e5fc742af44f7577732632, type: 3}
+    - _EmissionMap:
+        m_Texture: {fileID: 2800000, guid: 8acfaae37544bbb41a1ef4eadbcd9f0a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissiveMap:
+        m_Texture: {fileID: 2800000, guid: 8acfaae37544bbb41a1ef4eadbcd9f0a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.075
-    - _AlphaClip: 0
-    - _AlphaTest: 1
-    - _AlphaToMask: 0
-    - _Blend: 0
-    - _Cull: 2
-    - _CullMode: 2
-    - _Cutoff: 0.428
-    - _DstBlend: 0
-    - _EnableNormal: 1
-    - _Metallic: 0
-    - _RenderMode: 0
-    - _SrcBlend: 10
-    - _Surface: 0
-    - _SurfaceType: 1
-    - _UseNormalMap: 1
-    - _ZTest: 4
-    - _ZWrite: 1
+    - _Alpha: 0.605
+    - _EmissionStrength: 0.63
+    - _EmissiveStrength: 4
+    - _EnableEmission: 1
+    - _PulseIntensity: 5.3
+    - _PulseSpeed: 2
     m_Colors:
-    - _BaseColor: {r: 0, g: 0.7264151, b: 0.44890755, a: 1}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissiveColor: {r: 0, g: 1, b: 0.20354223, a: 1}
   m_BuildTextureStacks: []
