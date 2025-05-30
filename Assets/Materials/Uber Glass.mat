@@ -12,9 +12,10 @@ Material:
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
   m_ModifiedSerializedProperties: 8
   m_ValidKeywords:
+  - _ALPHABLEND_ON
+  - _RECEIVE_SHADOWS
   - _USE_NORMALMAP
   m_InvalidKeywords:
-  - _ALPHATEST_ON
   - _CULLMODE_BACK
   - _ENABLENORMAL_ON
   - _RENDERMODE_OPAQUE
@@ -25,7 +26,8 @@ Material:
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap: {}
+  stringTagMap:
+    RenderType: Transparent
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -49,11 +51,11 @@ Material:
     - _Cull: 2
     - _CullMode: 2
     - _Cutoff: 0.428
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _EnableNormal: 1
     - _Metallic: 0
     - _RenderMode: 0
-    - _SrcBlend: 10
+    - _SrcBlend: 5
     - _Surface: 0
     - _SurfaceType: 1
     - _UseNormalMap: 1

@@ -7,13 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Uber Panel B
+  m_Name: Uber Lights
   m_Shader: {fileID: 4800000, guid: 3b5a3ec88e5bd48488dcef7c14d49ffe, type: 3}
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
   m_ModifiedSerializedProperties: 28
   m_ValidKeywords:
   - _ALPHABLEND_ON
   - _FORCE_UNLIT_EMISSION
+  - _RECEIVE_SHADOWS
   - _USE_EMISSION
   m_InvalidKeywords:
   - _CULLMODE_BACK
@@ -61,7 +62,7 @@ Material:
     - _PulseSpeed: 2
     - _SrcBlend: 5
     - _UnlitEmission: 1
-    - _ZWrite: 0
+    - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}

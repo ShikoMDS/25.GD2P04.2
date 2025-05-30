@@ -25,7 +25,7 @@ Material:
   m_Parent: {fileID: 2100000, guid: 813cd1ef45cafb749a5a954615de5f6d, type: 2}
   m_ModifiedSerializedProperties: 10
   m_ValidKeywords:
-  - _ALPHABLEND_ON
+  - _RECEIVE_SHADOWS
   - _USE_EMISSION
   m_InvalidKeywords:
   - _EMISSION
@@ -35,7 +35,7 @@ Material:
   m_DoubleSidedGI: 1
   m_CustomRenderQueue: -1
   stringTagMap:
-    RenderType: Transparent
+    RenderType: Opaque
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:

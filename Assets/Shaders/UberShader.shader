@@ -1,8 +1,4 @@
-// ========================================
-// ENHANCED UBER SHADER WITH ALPHA SUPPORT
-// ========================================
-
-Shader "Custom/UberShader"
+Shader "Custom/UberShaderEnhanced"
 {
     Properties
     {
@@ -17,9 +13,28 @@ Shader "Custom/UberShader"
         _Alpha("Alpha", Range(0,1)) = 1.0
         _Cutoff("Alpha Cutoff", Range(0,1)) = 0.5
         
+        [HideInInspector] _SrcBlend("Src Blend", Float) = 1.0
+        [HideInInspector] _DstBlend("Dst Blend", Float) = 0.0
+        [HideInInspector] _ZWrite("Z Write", Float) = 1.0
+        
+        [Header(Shadow Settings)]
+        [Toggle(_RECEIVE_SHADOWS)] _ReceiveShadows("Receive Shadows", Float) = 1
+        _ShadowStrength("Shadow Strength", Range(0,2)) = 1.0
+        _ShadowColor("Shadow Tint", Color) = (0.5,0.5,0.7,1)
+        _AmbientDarkening("Ambient Darkening", Range(0,1)) = 0.3
+        [Toggle(_ENHANCED_SHADOWS)] _EnhancedShadows("Enhanced Shadow Quality", Float) = 0
+        
+        [Header(Light Response)]
+        _LightSensitivity("Light Sensitivity", Range(0,2)) = 1.0
+        _DarkeningThreshold("Darkening Threshold", Range(0,1)) = 0.1
+        _MaxDarkening("Max Darkening", Range(0,1)) = 0.8
+        
         [Header(Detail Maps)]
-        [Toggle(_USE_METALLICMAP)] _EnableMetallic("Enable Metallic/Roughness Map", Float) = 0
-        _MetallicMap("Metallic Map (R=Metallic, G=Roughness)", 2D) = "white" {}
+        [Toggle(_USE_METALLICMAP)] _EnableMetallic("Enable Metallic Map", Float) = 0
+        _MetallicMap("Metallic Map (R=Metallic)", 2D) = "white" {}
+        
+        [Toggle(_USE_ROUGHNESSMAP)] _EnableRoughness("Enable Roughness Map", Float) = 0
+        _RoughnessMap("Roughness Map (R=Roughness)", 2D) = "white" {}
         
         [Toggle(_USE_NORMALMAP)] _EnableNormal("Enable Normal Map", Float) = 0
         _NormalMap("Normal Map", 2D) = "bump" {}
@@ -62,7 +77,7 @@ Shader "Custom/UberShader"
     {
         LOD 200
 
-        // Opaque Pass
+        // Forward Lit Pass
         Pass
         {
             Name "ForwardLit"
@@ -77,22 +92,28 @@ Shader "Custom/UberShader"
             #pragma fragment frag
             
             // Feature toggles
-            #pragma multi_compile _ _USE_NORMALMAP
-            #pragma multi_compile _ _USE_EMISSION
-            #pragma multi_compile _ _USE_METALLICMAP
-            #pragma multi_compile _ _USE_DETAIL
-            #pragma multi_compile _ _USE_FRESNEL
-            #pragma multi_compile _ _USE_UV_SCROLL
-            #pragma multi_compile _ _FORCE_UNLIT_EMISSION
-            #pragma multi_compile _ _ALPHATEST_ON
-            #pragma multi_compile _ _ALPHABLEND_ON
+            #pragma shader_feature_local _USE_NORMALMAP
+            #pragma shader_feature_local _USE_EMISSION
+            #pragma shader_feature_local _USE_METALLICMAP
+            #pragma shader_feature_local _USE_ROUGHNESSMAP
+            #pragma shader_feature_local _USE_DETAIL
+            #pragma shader_feature_local _USE_FRESNEL
+            #pragma shader_feature_local _USE_UV_SCROLL
+            #pragma shader_feature_local _FORCE_UNLIT_EMISSION
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _RECEIVE_SHADOWS
+            #pragma shader_feature_local _ENHANCED_SHADOWS
             
-            // Unity lighting
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-            #pragma multi_compile _ _SHADOWS_SOFT
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            // Unity lighting - FIXED: Added CASCADE and SCREEN keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            #pragma multi_compile_fragment _ _LIGHT_LAYERS
+            #pragma multi_compile_fragment _ _LIGHT_COOKIES
+            #pragma multi_compile _ _CLUSTERED_RENDERING
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -105,6 +126,7 @@ Shader "Custom/UberShader"
                 float4 tangentOS : TANGENT;
                 float2 uv : TEXCOORD0;
                 float2 uv2 : TEXCOORD1;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -114,12 +136,17 @@ Shader "Custom/UberShader"
                 float2 uv2 : TEXCOORD1;
                 float3 normalWS : TEXCOORD2;
                 float3 viewDirWS : TEXCOORD3;
-                float4 shadowCoord : TEXCOORD4;
-                float3 worldPos : TEXCOORD5;
+                float3 worldPos : TEXCOORD4;
 #if _USE_NORMALMAP
-                float3 tangentWS : TEXCOORD6;
-                float3 bitangentWS : TEXCOORD7;
+                float3 tangentWS : TEXCOORD5;
+                float3 bitangentWS : TEXCOORD6;
 #endif
+                // FIXED: Proper shadow coordinate declaration
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                    float4 shadowCoord : TEXCOORD7;
+                #endif
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             // Texture declarations
@@ -128,6 +155,7 @@ Shader "Custom/UberShader"
             TEXTURE2D(_EmissiveMap); SAMPLER(sampler_EmissiveMap);
             TEXTURE2D(_AOMap); SAMPLER(sampler_AOMap);
             TEXTURE2D(_MetallicMap); SAMPLER(sampler_MetallicMap);
+            TEXTURE2D(_RoughnessMap); SAMPLER(sampler_RoughnessMap);
             TEXTURE2D(_DetailMap); SAMPLER(sampler_DetailMap);
 
             // Property declarations
@@ -135,6 +163,7 @@ Shader "Custom/UberShader"
                 float4 _BaseColor;
                 float4 _EmissiveColor;
                 float4 _FresnelColor;
+                float4 _ShadowColor;
                 float _Metallic;
                 float _Smoothness;
                 float _Alpha;
@@ -149,6 +178,11 @@ Shader "Custom/UberShader"
                 float _FresnelStrength;
                 float _ScrollSpeedX;
                 float _ScrollSpeedY;
+                float _ShadowStrength;
+                float _AmbientDarkening;
+                float _LightSensitivity;
+                float _DarkeningThreshold;
+                float _MaxDarkening;
                 float4 _BaseMap_ST;
                 float4 _DetailMap_ST;
             CBUFFER_END
@@ -156,6 +190,9 @@ Shader "Custom/UberShader"
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
+                UNITY_SETUP_INSTANCE_ID(IN);
+                UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
                 
                 VertexPositionInputs positionInputs = GetVertexPositionInputs(IN.positionOS.xyz);
                 VertexNormalInputs normalInputs = GetVertexNormalInputs(IN.normalOS, IN.tangentOS);
@@ -166,18 +203,25 @@ Shader "Custom/UberShader"
                 OUT.uv2 = IN.uv2;
                 OUT.normalWS = normalInputs.normalWS;
                 OUT.viewDirWS = GetWorldSpaceViewDir(positionInputs.positionWS);
-                OUT.shadowCoord = GetShadowCoord(positionInputs);
 
 #if _USE_NORMALMAP
                 OUT.tangentWS = normalInputs.tangentWS;
                 OUT.bitangentWS = normalInputs.bitangentWS;
 #endif
+
+                // FIXED: Proper shadow coordinate calculation
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                    OUT.shadowCoord = GetShadowCoord(positionInputs);
+                #endif
                 
                 return OUT;
             }
 
             half4 frag(Varyings IN) : SV_Target
             {
+                UNITY_SETUP_INSTANCE_ID(IN);
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
+
                 // UV Scrolling
                 float2 scrolledUV = IN.uv;
 #if _USE_UV_SCROLL
@@ -208,9 +252,13 @@ Shader "Custom/UberShader"
                 float smoothness = _Smoothness;
 
 #if _USE_METALLICMAP
-                float4 metallicSample = SAMPLE_TEXTURE2D(_MetallicMap, sampler_MetallicMap, scrolledUV);
-                metallic *= metallicSample.r;
-                smoothness *= (1.0 - metallicSample.g); // Green channel is roughness
+                float metallicSample = SAMPLE_TEXTURE2D(_MetallicMap, sampler_MetallicMap, scrolledUV).r;
+                metallic *= metallicSample;
+#endif
+
+#if _USE_ROUGHNESSMAP
+                float roughnessSample = SAMPLE_TEXTURE2D(_RoughnessMap, sampler_RoughnessMap, scrolledUV).r;
+                smoothness *= (1.0 - roughnessSample);
 #endif
 
                 // Ambient occlusion
@@ -232,18 +280,27 @@ Shader "Custom/UberShader"
                 float3 lighting = 0;
 
 #if !_FORCE_UNLIT_EMISSION
-                // PBR Lighting
+                // Setup input data for lighting
                 InputData inputData = (InputData)0;
                 inputData.positionWS = IN.worldPos;
                 inputData.normalWS = normalWS;
                 inputData.viewDirectionWS = viewDirWS;
-                inputData.shadowCoord = IN.shadowCoord;
                 inputData.fogCoord = 0;
                 inputData.vertexLighting = 0;
                 inputData.bakedGI = SampleSH(normalWS);
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
                 inputData.shadowMask = SAMPLE_SHADOWMASK(IN.uv2);
 
+                // FIXED: Get proper shadow coordinates
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                    inputData.shadowCoord = IN.shadowCoord;
+                #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                    inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
+                #else
+                    inputData.shadowCoord = float4(0, 0, 0, 0);
+                #endif
+
+                // Surface data setup
                 SurfaceData surfaceData = (SurfaceData)0;
                 surfaceData.albedo = albedo;
                 surfaceData.metallic = metallic;
@@ -256,7 +313,61 @@ Shader "Custom/UberShader"
                 surfaceData.clearCoatMask = 0;
                 surfaceData.clearCoatSmoothness = 0;
 
+                // Calculate lighting with proper shadow support
                 lighting = UniversalFragmentPBR(inputData, surfaceData).rgb;
+
+                // Get the main light (needed for multiple features)
+                Light mainLight = GetMainLight(inputData.shadowCoord);
+
+                // FIXED: Apply custom shadow effects after lighting calculation
+#if _RECEIVE_SHADOWS
+                float shadowAttenuation = mainLight.shadowAttenuation;
+                
+                // Apply shadow strength
+                shadowAttenuation = lerp(1.0 - _ShadowStrength, 1.0, shadowAttenuation);
+                
+                // Apply shadow color tinting
+                float3 shadowTint = lerp(_ShadowColor.rgb, float3(1,1,1), shadowAttenuation);
+                lighting *= shadowTint;
+                
+                // Apply enhanced shadows if needed
+    #if _ENHANCED_SHADOWS
+                // Additional shadow sampling for smoother shadows
+                float enhancedShadow = 0.0;
+                float2 shadowTexelSize = GetMainLightShadowParams().zw;
+                float2 offsets[4] = {
+                    float2(-0.5, -0.5),
+                    float2(0.5, -0.5),
+                    float2(-0.5, 0.5),
+                    float2(0.5, 0.5)
+                };
+                
+                for(int i = 0; i < 4; i++)
+                {
+                    float4 offsetCoord = inputData.shadowCoord;
+                    offsetCoord.xy += offsets[i] * shadowTexelSize;
+                    Light offsetLight = GetMainLight(offsetCoord);
+                    enhancedShadow += offsetLight.shadowAttenuation;
+                }
+                enhancedShadow *= 0.25;
+                
+                // Blend enhanced shadow with regular shadow
+                shadowAttenuation = lerp(shadowAttenuation, enhancedShadow, 0.5);
+                shadowAttenuation = lerp(1.0 - _ShadowStrength, 1.0, shadowAttenuation);
+                lighting *= lerp(1.0, shadowAttenuation, 0.5);
+    #endif
+#endif
+
+                // Apply ambient darkening
+                float lightContribution = dot(normalWS, mainLight.direction) * 0.5 + 0.5;
+                lightContribution = saturate(lightContribution * _LightSensitivity);
+                
+                if (lightContribution < _DarkeningThreshold)
+                {
+                    float darkeningFactor = 1.0 - (lightContribution / max(_DarkeningThreshold, 0.01));
+                    float darkening = lerp(1.0, 1.0 - _MaxDarkening, darkeningFactor);
+                    lighting *= darkening;
+                }
 #endif
 
                 // Emission
@@ -290,7 +401,7 @@ Shader "Custom/UberShader"
             ENDHLSL
         }
 
-        // Shadow pass
+        // Shadow pass - FIXED: Custom implementation without Shadows.hlsl dependency
         Pass
         {
             Name "ShadowCaster"
@@ -304,14 +415,92 @@ Shader "Custom/UberShader"
             HLSLPROGRAM
             #pragma vertex ShadowPassVertex
             #pragma fragment ShadowPassFragment
-            #pragma multi_compile _ _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma multi_compile_instancing
+            #pragma multi_compile _ _CASTING_PUNCTUAL_LIGHT_SHADOW
 
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+            // Shadow bias parameters
+            float3 _LightDirection;
+            float3 _LightPosition;
+            float4 _ShadowBias; // x: depth bias, y: normal bias
+
+            // Need to declare our properties for shadow pass
+            TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+            
+            CBUFFER_START(UnityPerMaterial)
+                float4 _BaseColor;
+                float _Alpha;
+                float _Cutoff;
+                float4 _BaseMap_ST;
+            CBUFFER_END
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+                float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            struct Varyings
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                UNITY_VERTEX_OUTPUT_STEREO
+            };
+
+            float4 GetShadowPositionHClip(Attributes input)
+            {
+                float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+                float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
+
+                #if _CASTING_PUNCTUAL_LIGHT_SHADOW
+                    float3 lightDirectionWS = normalize(_LightPosition - positionWS);
+                #else
+                    float3 lightDirectionWS = _LightDirection;
+                #endif
+
+                // Apply shadow bias
+                positionWS = positionWS + lightDirectionWS * _ShadowBias.x + normalWS * _ShadowBias.y;
+                
+                float4 positionCS = TransformWorldToHClip(positionWS);
+
+                #if UNITY_REVERSED_Z
+                    positionCS.z = min(positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                #else
+                    positionCS.z = max(positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                #endif
+
+                return positionCS;
+            }
+
+            Varyings ShadowPassVertex(Attributes input)
+            {
+                Varyings output;
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                output.positionCS = GetShadowPositionHClip(input);
+                output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+                return output;
+            }
+
+            half ShadowPassFragment(Varyings input) : SV_TARGET
+            {
+                #if _ALPHATEST_ON
+                    float4 baseSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
+                    float alpha = baseSample.a * _BaseColor.a * _Alpha;
+                    clip(alpha - _Cutoff);
+                #endif
+                return 0;
+            }
             ENDHLSL
         }
 
-        // Depth pass
+        // Depth pass - FIXED: Custom implementation
         Pass
         {
             Name "DepthOnly"
@@ -319,15 +508,58 @@ Shader "Custom/UberShader"
 
             ZWrite On
             ColorMask 0
-            Cull Back
+            Cull [_CullMode]
 
             HLSLPROGRAM
             #pragma vertex DepthOnlyVertex
             #pragma fragment DepthOnlyFragment
-            #pragma multi_compile _ _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHATEST_ON
 
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+            
+            CBUFFER_START(UnityPerMaterial)
+                float4 _BaseColor;
+                float _Alpha;
+                float _Cutoff;
+                float4 _BaseMap_ST;
+            CBUFFER_END
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            struct Varyings
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                UNITY_VERTEX_OUTPUT_STEREO
+            };
+
+            Varyings DepthOnlyVertex(Attributes input)
+            {
+                Varyings output;
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+                return output;
+            }
+
+            half DepthOnlyFragment(Varyings input) : SV_TARGET
+            {
+                #if _ALPHATEST_ON
+                    float4 baseSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
+                    float alpha = baseSample.a * _BaseColor.a * _Alpha;
+                    clip(alpha - _Cutoff);
+                #endif
+                return 0;
+            }
             ENDHLSL
         }
     }
@@ -335,134 +567,3 @@ Shader "Custom/UberShader"
     CustomEditor "UberShaderGUI"
     FallBack "Hidden/InternalErrorShader"
 }
-
-// ========================================
-// CUSTOM SHADER GUI FOR BLEND MODE CONTROL
-// ========================================
-
-/*
-Create this C# script in your project as "UberShaderGUI.cs":
-
-using UnityEngine;
-using UnityEditor;
-
-public class UberShaderGUI : ShaderGUI
-{
-    public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
-    {
-        Material target = materialEditor.target as Material;
-        
-        // Find blend mode property
-        MaterialProperty blendMode = FindProperty("_BlendMode", properties);
-        
-        // Draw default inspector
-        base.OnGUI(materialEditor, properties);
-        
-        // Set render states based on blend mode
-        SetupMaterialBlendMode(target, (int)blendMode.floatValue);
-    }
-    
-    private void SetupMaterialBlendMode(Material material, int blendMode)
-    {
-        switch (blendMode)
-        {
-            case 0: // Opaque
-                material.SetOverrideTag("RenderType", "Opaque");
-                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                material.SetInt("_ZWrite", 1);
-                material.DisableKeyword("_ALPHATEST_ON");
-                material.DisableKeyword("_ALPHABLEND_ON");
-                material.renderQueue = -1;
-                break;
-                
-            case 1: // Transparent
-                material.SetOverrideTag("RenderType", "Transparent");
-                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                material.SetInt("_ZWrite", 0);
-                material.DisableKeyword("_ALPHATEST_ON");
-                material.EnableKeyword("_ALPHABLEND_ON");
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                break;
-                
-            case 2: // Cutout
-                material.SetOverrideTag("RenderType", "TransparentCutout");
-                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                material.SetInt("_ZWrite", 1);
-                material.EnableKeyword("_ALPHATEST_ON");
-                material.DisableKeyword("_ALPHABLEND_ON");
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
-                break;
-        }
-    }
-}
-*/
-
-// ========================================
-// MATERIAL SETUP EXAMPLES WITH ALPHA
-// ========================================
-
-/*
-TRANSPARENT GLASS DOOR MATERIAL:
-===============================
-Material Name: "GlassDoorMaterial"
-
-Base Properties:
-- Base Map: GlassDoor_Albedo.png
-- Base Color: (1, 1, 1, 1)
-- Metallic: 0.1
-- Smoothness: 0.9 (very smooth for glass)
-
-Transparency:
-- Blend Mode: Transparent
-- Alpha: 0.3 (30% opacity for glass effect)
-
-Emission:
-- Enable Emission: ON
-- Emissive Map: GlassDoor_Emission.png
-- Emissive Color: (0.2, 0.8, 1, 1)
-- Emission Strength: 1.5
-
-Fresnel Effect:
-- Enable Fresnel: ON
-- Fresnel Color: (1, 1, 1, 1)
-- Fresnel Power: 5 (strong fresnel for glass)
-- Fresnel Strength: 2
-
-FADING HOLOGRAM PANEL:
-=====================
-Material Name: "HologramPanelMaterial"
-
-Base Properties:
-- Base Map: Hologram_Albedo.png
-- Base Color: (0.5, 1, 0.8, 1)
-- Metallic: 0
-- Smoothness: 0.1
-
-Transparency:
-- Blend Mode: Transparent
-- Alpha: 0.6 (semi-transparent hologram)
-
-Emission:
-- Enable Emission: ON
-- Emissive Map: Hologram_Emission.png
-- Emissive Color: (0, 1, 0.5, 1)
-- Emission Strength: 3
-- Pulse Speed: 2 (animated hologram flicker)
-- Pulse Amplitude: 0.4
-
-UV Scrolling:
-- Enable UV Scrolling: ON
-- Scroll Speed Y: 0.5 (scrolling data effect)
-
-USAGE NOTES:
-===========
-1. Transparent objects render after opaque ones, so order matters
-2. Use Cutout mode for sharp edges (like perforated metal)
-3. Fresnel effect is very effective on transparent materials
-4. Combine alpha with emission for glowing transparent effects
-5. The Alpha slider controls overall transparency
-6. Base texture alpha channel is multiplied with the Alpha slider
-*/

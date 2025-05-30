@@ -1,5 +1,55 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7144610891653146750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fe2d20fee63e304299401b9fc1c70fc, type: 3}
+  m_Name: CCTVFullscreenFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  settings:
+    scanlineIntensity: 0.15
+    scanlineCount: 40
+    vignetteIntensity: 0.25
+    noiseIntensity: 0.08
+    distortionAmount: 0.005
+    colorDesaturation: 1
+    tintColor: {r: 1, g: 0.4, b: 0.2, a: 1}
+    renderPassEvent: 600
+    cctvShader: {fileID: 4800000, guid: 8c0a634936562ff4fa177b8aa7ce063e, type: 3}
+--- !u!114 &-5108321404941335206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f46b6ac881717de40b716b2110c47a0b, type: 3}
+  m_Name: CCTVRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    scanlineIntensity: 0.3
+    scanlineCount: 25
+    vignetteIntensity: 0.4
+    noiseIntensity: 0.1
+    distortionAmount: 0.02
+    colorDesaturation: 0.6
+    tintColor:
+      r: 0.8
+      g: 1
+      b: 0.8
+      a: 1
+    renderPassEvent: 550
+    cctvMaterial: {fileID: 2100000, guid: 9c0c8cb0e37738a4d9c9241211e1da78, type: 2}
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53,8 +103,9 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
-  m_RendererFeatureMap: adc0de57c6d2eee5
-  m_UseNativeRenderPass: 0
+  - {fileID: -7144610891653146750}
+  m_RendererFeatureMap: adc0de57c6d2eee58297a0703f3ed99c
+  m_UseNativeRenderPass: 1
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:

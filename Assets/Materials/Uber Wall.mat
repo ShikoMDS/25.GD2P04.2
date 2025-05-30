@@ -12,8 +12,10 @@ Material:
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
   m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
-  - _ALPHABLEND_ON
+  - _RECEIVE_SHADOWS
   - _USE_EMISSION
+  - _USE_METALLICMAP
+  - _USE_ROUGHNESSMAP
   m_InvalidKeywords:
   - _ENABLEEMISSION
   - _METALLICSPECGLOSSMAP
@@ -23,7 +25,7 @@ Material:
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
-    RenderType: Transparent
+    RenderType: Opaque
   disabledShaderPasses: []
   m_LockedProperties: _AlphaTest
   m_SavedProperties:
@@ -61,18 +63,27 @@ Material:
     m_Floats:
     - _Alpha: 1
     - _AlphaTest: 0
-    - _BlendMode: 1
+    - _AmbientDarkening: 0.294
+    - _BlendMode: 0
     - _ColorIntensity: 0.98
-    - _CullMode: 2
+    - _CullMode: 0
     - _Cutoff: 0
+    - _DarkeningThreshold: 0.098
     - _DetailStrength: 1
-    - _DstBlend: 10
+    - _DstBlend: 0
     - _EmissionStrength: 0
     - _EnableEmission: 1
+    - _EnableMetallic: 1
     - _EnableNormal: 0
+    - _EnableRoughness: 1
+    - _EnhancedShadows: 0
+    - _LightSensitivity: 2
+    - _MaxDarkening: 0.626
     - _Metallic: 0
+    - _ReceiveShadows: 1
     - _Roughness: 0.3
-    - _SrcBlend: 5
+    - _ShadowStrength: 1.28
+    - _SrcBlend: 1
     - _UnlitEmission: 0
     - _UseEmission: 0
     - _UseMetallicMap: 0
@@ -83,4 +94,5 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissiveColor: {r: 1, g: 1, b: 1, a: 1}
     - _MetallicColor: {r: 0.5660378, g: 0.5660378, b: 0.5660378, a: 1}
+    - _ShadowColor: {r: 0.43876824, g: 0.43876824, b: 0.6415094, a: 1}
   m_BuildTextureStacks: []

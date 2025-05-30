@@ -12,7 +12,7 @@ Material:
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
   m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
-  - _ALPHABLEND_ON
+  - _RECEIVE_SHADOWS
   - _USE_EMISSION
   m_InvalidKeywords:
   - _ENABLEEMISSION
@@ -23,7 +23,7 @@ Material:
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
-    RenderType: Transparent
+    RenderType: Opaque
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -43,15 +43,25 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AOStrength: 1
     - _Alpha: 1
-    - _BlendMode: 1
+    - _AmbientDarkening: 0.141
+    - _BlendMode: 0
     - _CullMode: 0
-    - _DstBlend: 10
+    - _DarkeningThreshold: 0.626
+    - _DstBlend: 0
     - _EmissiveStrength: 0.69
+    - _EnableDetail: 0
     - _EnableEmission: 1
+    - _EnhancedShadows: 0
+    - _LightSensitivity: 1.44
+    - _MaxDarkening: 0.478
     - _Metallic: 0
     - _PulseAmplitude: 0
-    - _SrcBlend: 5
+    - _ReceiveShadows: 1
+    - _ShadowStrength: 2
+    - _SrcBlend: 1
     - _ZWrite: 1
-    m_Colors: []
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
