@@ -10,8 +10,9 @@ Material:
   m_Name: UberShaderMat Variant 1
   m_Shader: {fileID: 4800000, guid: 3b5a3ec88e5bd48488dcef7c14d49ffe, type: 3}
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
-  m_ModifiedSerializedProperties: 0
+  m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
+  - _ALPHABLEND_ON
   - _FORCE_UNLIT_EMISSION
   m_InvalidKeywords:
   - _CULLMODE_BACK
@@ -22,7 +23,7 @@ Material:
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
-    RenderType: Opaque
+    RenderType: Transparent
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -42,10 +43,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Alpha: 1
+    - _BlendMode: 1
+    - _CullMode: 0
+    - _DstBlend: 10
     - _EmissionStrength: 1
     - _Metallic: 0
     - _PulseIntensity: 0.5
     - _PulseSpeed: 1
+    - _SrcBlend: 5
     - _UnlitEmission: 1
+    - _ZWrite: 0
     m_Colors: []
   m_BuildTextureStacks: []

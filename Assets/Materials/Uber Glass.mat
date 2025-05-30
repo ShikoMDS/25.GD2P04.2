@@ -12,13 +12,14 @@ Material:
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
   m_ModifiedSerializedProperties: 8
   m_ValidKeywords:
-  - _ALPHATEST_ON
-  - _USENORMALMAP
+  - _USE_NORMALMAP
   m_InvalidKeywords:
+  - _ALPHATEST_ON
   - _CULLMODE_BACK
   - _ENABLENORMAL_ON
   - _RENDERMODE_OPAQUE
   - _USEMETALLICWORKFLOW_ON
+  - _USENORMALMAP
   - _USENORMALMAP_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0

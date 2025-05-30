@@ -3,136 +3,93 @@ using UnityEditor;
 
 public class UberShaderGUI : ShaderGUI
 {
-    public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
+    public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
     {
-        Material material = materialEditor.target as Material;
+        Material target = materialEditor.target as Material;
 
-        // Find all properties
-        MaterialProperty baseMap = FindProperty("_BaseMap", props);
-        MaterialProperty baseColor = FindProperty("_BaseColor", props);
+        // Find blend mode property
+        MaterialProperty blendMode = FindProperty("_BlendMode", properties);
 
-        MaterialProperty useNormalMap = FindProperty("_UseNormalMap", props);
-        MaterialProperty normalMap = FindProperty("_NormalMap", props);
-        MaterialProperty normalStrength = FindProperty("_NormalStrength", props);
+        // Draw default inspector
+        base.OnGUI(materialEditor, properties);
 
-        MaterialProperty useMetallic = FindProperty("_UseMetallicWorkflow", props);
-        MaterialProperty metallicMap = FindProperty("_MetallicMap", props);
-        MaterialProperty metallicColor = FindProperty("_MetallicColor", props);
-        MaterialProperty metallic = FindProperty("_Metallic", props);
-
-        MaterialProperty roughnessMap = FindProperty("_RoughnessMap", props);
-        MaterialProperty roughness = FindProperty("_Roughness", props);
-        MaterialProperty smoothness = FindProperty("_Smoothness", props);
-
-        MaterialProperty enableEmission = FindProperty("_EnableEmission", props);
-        MaterialProperty emissionMap = FindProperty("_EmissionMap", props);
-        MaterialProperty emissionColor = FindProperty("_EmissionColor", props);
-        MaterialProperty emissionStrength = FindProperty("_EmissionStrength", props);
-
-        MaterialProperty enablePulse = FindProperty("_EnablePulse", props);
-        MaterialProperty pulseSpeed = FindProperty("_PulseSpeed", props);
-        MaterialProperty pulseIntensity = FindProperty("_PulseIntensity", props);
-
-        MaterialProperty alphaTest = FindProperty("_AlphaTest", props);
-        MaterialProperty cutoff = FindProperty("_Cutoff", props);
-
-        // Header styles
-        GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel);
-        headerStyle.fontSize = 12;
-
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("Base Properties", headerStyle);
-        EditorGUI.indentLevel++;
-        materialEditor.TexturePropertySingleLine(new GUIContent("Base Map"), baseMap, baseColor);
-        EditorGUI.indentLevel--;
-
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("Normal Mapping", headerStyle);
-        EditorGUI.indentLevel++;
-        DrawToggle(materialEditor, material, useNormalMap, "_USENORMALMAP");
-        if (useNormalMap.floatValue == 1)
+        // Add custom transparent options
+        if ((int)blendMode.floatValue == 1) // If transparent mode
         {
-            materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map"), normalMap);
-            materialEditor.ShaderProperty(normalStrength, "Normal Strength");
-        }
-        EditorGUI.indentLevel--;
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Transparent Rendering Options", EditorStyles.boldLabel);
 
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("PBR Properties", headerStyle);
-        EditorGUI.indentLevel++;
-        DrawToggle(materialEditor, material, useMetallic, "_USEMETALLICWORKFLOW");
-        if (useMetallic.floatValue == 1)
-        {
-            EditorGUILayout.LabelField("Metallic", EditorStyles.miniBoldLabel);
-            materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map"), metallicMap);
-            materialEditor.ShaderProperty(metallicColor, "Metallic Tint");
-            materialEditor.ShaderProperty(metallic, "Metallic");
-
-            EditorGUILayout.Space(5);
-            EditorGUILayout.LabelField("Roughness", EditorStyles.miniBoldLabel);
-            materialEditor.TexturePropertySingleLine(new GUIContent("Roughness Map"), roughnessMap);
-            materialEditor.ShaderProperty(roughness, "Roughness");
-
-            EditorGUILayout.HelpBox("Tip: Use a packed texture with Metallic in R channel and Roughness in G channel for efficiency.", MessageType.Info);
-        }
-        else
-        {
-            materialEditor.ShaderProperty(smoothness, "Smoothness");
-        }
-        EditorGUI.indentLevel--;
-
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("Emission", headerStyle);
-        EditorGUI.indentLevel++;
-        DrawToggle(materialEditor, material, enableEmission, "_ENABLEEMISSION");
-        if (enableEmission.floatValue == 1)
-        {
-            materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map"), emissionMap, emissionColor);
-            materialEditor.ShaderProperty(emissionStrength, "Emission Strength");
-
-            EditorGUILayout.Space(5);
-            DrawToggle(materialEditor, material, enablePulse, "_ENABLEPULSE");
-            if (enablePulse.floatValue == 1)
+            bool useDepthWrite = target.GetInt("_ZWrite") == 1;
+            bool newDepthWrite = EditorGUILayout.Toggle("Enable Depth Write", useDepthWrite);
+            if (newDepthWrite != useDepthWrite)
             {
-                materialEditor.ShaderProperty(pulseSpeed, "Pulse Speed");
-                materialEditor.ShaderProperty(pulseIntensity, "Pulse Intensity");
+                target.SetInt("_ZWrite", newDepthWrite ? 1 : 0);
             }
-        }
-        EditorGUI.indentLevel--;
 
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("Transparency", headerStyle);
-        EditorGUI.indentLevel++;
-        DrawToggle(materialEditor, material, alphaTest, "_ALPHATEST_ON");
-        if (alphaTest.floatValue == 1)
-        {
-            materialEditor.ShaderProperty(cutoff, "Alpha Cutoff");
-        }
-        EditorGUI.indentLevel--;
+            // Custom render queue slider
+            int currentQueue = target.renderQueue;
+            int newQueue = EditorGUILayout.IntSlider("Render Queue", currentQueue, 2000, 3500);
+            if (newQueue != currentQueue)
+            {
+                target.renderQueue = newQueue;
+            }
 
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("Material Usage Tips", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox(
-            "• Diffuse Map: Use _BaseMap for your main texture\n" +
-            "• Metallic Map: Red channel for metallic values (0=dielectric, 1=metal)\n" +
-            "• Roughness Map: Single channel texture (0=mirror, 1=rough)\n" +
-            "• For packed textures: Metallic(R), Roughness(G), AO(B)",
-            MessageType.Info);
+            EditorGUILayout.HelpBox(
+                "Render Queue Guide:\n" +
+                "• 2000-2499: Geometry (Opaque-like)\n" +
+                "• 2500-2999: AlphaTest\n" +
+                "• 3000+: Transparent",
+                MessageType.Info);
+        }
+
+        // Set render states based on blend mode
+        SetupMaterialBlendMode(target, (int)blendMode.floatValue);
     }
 
-    private void DrawToggle(MaterialEditor editor, Material mat, MaterialProperty prop, string keyword)
+    private void SetupMaterialBlendMode(Material material, int blendMode)
     {
-        EditorGUI.BeginChangeCheck();
-        editor.ShaderProperty(prop, prop.displayName);
-        if (EditorGUI.EndChangeCheck())
+        switch (blendMode)
         {
-            foreach (Material m in prop.targets)
-            {
-                if (prop.floatValue == 1)
-                    m.EnableKeyword(keyword);
-                else
-                    m.DisableKeyword(keyword);
-            }
+            case 0: // Opaque
+                material.SetOverrideTag("RenderType", "Opaque");
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_ZWrite", 1);
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.DisableKeyword("_ALPHABLEND_ON");
+                material.renderQueue = -1;
+                break;
+
+            case 1: // Transparent
+                material.SetOverrideTag("RenderType", "Transparent");
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+
+                // Don't automatically set ZWrite to 0 - let user control it
+                if (!material.HasProperty("_ZWrite") || material.GetInt("_ZWrite") == 0)
+                {
+                    material.SetInt("_ZWrite", 0); // Default to off for backwards compatibility
+                }
+
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.EnableKeyword("_ALPHABLEND_ON");
+
+                // Set to early transparent queue by default (renders more like opaque)
+                if (material.renderQueue == -1 || material.renderQueue == 3000)
+                {
+                    material.renderQueue = 2450; // Between opaque and alpha test
+                }
+                break;
+
+            case 2: // Cutout
+                material.SetOverrideTag("RenderType", "TransparentCutout");
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_ZWrite", 1);
+                material.EnableKeyword("_ALPHATEST_ON");
+                material.DisableKeyword("_ALPHABLEND_ON");
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                break;
         }
     }
 }
