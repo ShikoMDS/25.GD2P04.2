@@ -39,12 +39,15 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _BlendMode: 0
     - _Cull: 0
+    - _CullMode: 2
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EmissiveStrength: 0.09
     - _Metallic: 0
     - _ReceiveShadows: 1
+    - _SrcBlend: 1
     - _Surface: 0
     - _ZWrite: 1
     m_Colors:

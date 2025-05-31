@@ -7,21 +7,17 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Uber Glass
+  m_Name: Uber Bridge Details
   m_Shader: {fileID: 4800000, guid: 3b5a3ec88e5bd48488dcef7c14d49ffe, type: 3}
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
-  m_ModifiedSerializedProperties: 24
+  m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
   - _ALPHABLEND_ON
   - _RECEIVE_SHADOWS
-  - _USE_NORMALMAP
-  m_InvalidKeywords:
-  - _CULLMODE_BACK
-  - _ENABLENORMAL_ON
-  - _RENDERMODE_OPAQUE
-  - _USEMETALLICWORKFLOW_ON
-  - _USENORMALMAP
-  - _USENORMALMAP_ON
+  - _USE_EMISSION
+  - _USE_METALLICMAP
+  - _USE_ROUGHNESSMAP
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -34,34 +30,32 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 7370fb7604e5fc742af44f7577732632, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7312ca079aa8dbf469bd3232f58b97f6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 7370fb7604e5fc742af44f7577732632, type: 3}
+    - _EmissiveMap:
+        m_Texture: {fileID: 2800000, guid: d1ab2cd7ec6bb184fbbc975b6a811bad, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicMap:
+        m_Texture: {fileID: 2800000, guid: ac1ef1601bce8bb4281ce94da35e09bd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RoughnessMap:
+        m_Texture: {fileID: 2800000, guid: d16a9bdef15f15845b51755b4a3203f7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.462
-    - _AlphaClip: 0
-    - _AlphaTest: 1
-    - _AlphaToMask: 0
-    - _Blend: 0
+    - _Alpha: 0.277
     - _BlendMode: 1
-    - _Cull: 2
     - _CullMode: 0
-    - _Cutoff: 0.428
     - _DstBlend: 10
-    - _EnableNormal: 1
-    - _Metallic: 0
-    - _RenderMode: 0
+    - _EmissiveStrength: 1.18
+    - _EnableEmission: 1
+    - _EnableMetallic: 1
+    - _EnableRoughness: 1
     - _SrcBlend: 5
-    - _Surface: 0
-    - _SurfaceType: 1
-    - _UseNormalMap: 1
-    - _ZTest: 4
-    - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.58592916, g: 0.93103456, b: 0.9339623, a: 1}
+    - _EmissiveColor: {r: 0, g: 1, b: 0.34083152, a: 1}
   m_BuildTextureStacks: []

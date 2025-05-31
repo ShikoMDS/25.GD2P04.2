@@ -1,23 +1,58 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using System.IO;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+
+// ============================================================================
+// FLYCAM CONTROLLER
+// ============================================================================
+// Free-flying camera controller with movement, mouse look, zoom, and screenshot functionality
+// Provides FPS-style camera controls for scene navigation and inspection
 
 public class FlyCam : MonoBehaviour
 {
+    // ========================================================================
+    // MOVEMENT CONFIGURATION
+    // ========================================================================
+
+    [Header("Movement Settings")] [Tooltip("Base movement speed in units per second")]
     public float moveSpeed = 5f;
-    public float lookSpeed = 2f;
+
+    [Tooltip("Mouse look sensitivity")] public float lookSpeed = 2f;
+
+    // ========================================================================
+    // ZOOM CONFIGURATION
+    // ========================================================================
+
+    [Header("Zoom Settings")] [Tooltip("Field of view when zooming")]
     public float zoomFOV = 30f;
-    public float zoomSpeed = 5f;
+
+    [Tooltip("Speed of zoom transition")] public float zoomSpeed = 5f;
+
+    // ========================================================================
+    // UI CONFIGURATION
+    // ========================================================================
+
+    [Header("UI Elements")] [Tooltip("Text component to display current speed")]
     public TextMeshProUGUI speedText;
+
+    // ========================================================================
+    // PRIVATE STATE
+    // ========================================================================
 
     private float normalFOV;
     private float targetFOV;
     private Camera cam;
     private float rotationX, rotationY;
 
-    void Start()
+    // ========================================================================
+    // UNITY LIFECYCLE
+    // ========================================================================
+
+    /// <summary>
+    ///     Initialize camera settings and lock cursor
+    /// </summary>
+    private void Start()
     {
         cam = GetComponent<Camera>();
         Cursor.lockState = CursorLockMode.Locked;
@@ -25,65 +60,124 @@ public class FlyCam : MonoBehaviour
         targetFOV = normalFOV;
     }
 
-    void Update()
+    /// <summary>
+    ///     Handle all input and camera updates each frame
+    /// </summary>
+    private void Update()
     {
-        // Movement
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-        float moveY = 0f;
+        HandleMovement();
+        HandleMouseLook();
+        HandleSpeedAdjustment();
+        HandleZoom();
+        HandleScreenshot();
+        UpdateUI();
+    }
+
+    // ========================================================================
+    // MOVEMENT HANDLING
+    // ========================================================================
+
+    /// <summary>
+    ///     Process movement input and apply to camera transform
+    /// </summary>
+    private void HandleMovement()
+    {
+        var moveX = Input.GetAxis("Horizontal");
+        var moveZ = Input.GetAxis("Vertical");
+        var moveY = 0f;
 
         if (Input.GetKey(KeyCode.E)) moveY = 1f;
         if (Input.GetKey(KeyCode.Q)) moveY = -1f;
 
-        Vector3 move = (transform.right * moveX + transform.up * moveY + transform.forward * moveZ);
-        float currentSpeed = moveSpeed;
+        var move = transform.right * moveX + transform.up * moveY + transform.forward * moveZ;
+        var currentSpeed = moveSpeed;
 
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            currentSpeed *= 2f; // Double speed when holding Left Shift
-        }
+        if (Input.GetKey(KeyCode.LeftShift)) currentSpeed *= 2f;
 
         transform.position += move * currentSpeed * Time.deltaTime;
+    }
 
+    // ========================================================================
+    // CAMERA ROTATION
+    // ========================================================================
 
-        // Mouse Look
+    /// <summary>
+    ///     Process mouse input for camera rotation with vertical clamping
+    /// </summary>
+    private void HandleMouseLook()
+    {
         rotationX += Input.GetAxis("Mouse X") * lookSpeed;
         rotationY -= Input.GetAxis("Mouse Y") * lookSpeed;
         rotationY = Mathf.Clamp(rotationY, -90f, 90f);
         transform.localRotation = Quaternion.Euler(rotationY, rotationX, 0f);
+    }
 
-        // Adjust speed with mouse scroll
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
+    // ========================================================================
+    // SPEED CONTROL
+    // ========================================================================
+
+    /// <summary>
+    ///     Adjust movement speed using mouse scroll wheel
+    /// </summary>
+    private void HandleSpeedAdjustment()
+    {
+        var scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0f)
         {
             moveSpeed += scroll * 10f;
-            moveSpeed = Mathf.Clamp(moveSpeed, 1f, 50f); // Clamp
+            moveSpeed = Mathf.Clamp(moveSpeed, 1f, 50f);
         }
+    }
 
-        // Zoom
+    // ========================================================================
+    // ZOOM FUNCTIONALITY
+    // ========================================================================
+
+    /// <summary>
+    ///     Handle zoom input and smooth FOV transitions
+    /// </summary>
+    private void HandleZoom()
+    {
         targetFOV = Input.GetKey(KeyCode.F) ? zoomFOV : normalFOV;
         cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime * zoomSpeed);
+    }
 
-        // Screenshot
+    // ========================================================================
+    // SCREENSHOT CAPTURE
+    // ========================================================================
+
+    /// <summary>
+    ///     Capture and save screenshot with timestamp
+    /// </summary>
+    private void HandleScreenshot()
+    {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            string filename = $"Technical Scene Screenshot {System.DateTime.Now:dd.MM.yyyy - HH.mm.ss}.png";
+            var filename = $"Technical Scene Screenshot {DateTime.Now:dd.MM.yyyy - HH.mm.ss}.png";
 
-            string folder = Path.Combine(Application.dataPath, "../ScreenShots");
+            var folder = Path.Combine(Application.dataPath, "../ScreenShots");
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
-            string fullPath = Path.Combine(folder, filename);
+            var fullPath = Path.Combine(folder, filename);
             ScreenCapture.CaptureScreenshot(fullPath);
 
             Debug.Log("Screenshot saved: " + filename);
         }
+    }
 
-        // Speed text
+    // ========================================================================
+    // UI UPDATES
+    // ========================================================================
+
+    /// <summary>
+    ///     Update speed display text with current values
+    /// </summary>
+    private void UpdateUI()
+    {
         if (speedText != null)
         {
-            string boost = Input.GetKey(KeyCode.LeftShift) ? " (x2)" : "";
-            speedText.text = $"FlyCam Speed: {currentSpeed:F1}{boost}";
+            var boost = Input.GetKey(KeyCode.LeftShift) ? " (x2)" : "";
+            speedText.text = $"FlyCam Speed: {moveSpeed:F1}{boost}";
         }
-
     }
 }

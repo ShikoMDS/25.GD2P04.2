@@ -1,41 +1,51 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 public class PulsingSkyboxShaderGUI : ShaderGUI
 {
     public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
     {
-        Material material = materialEditor.target as Material;
+        var material = materialEditor.target as Material;
 
-        // Find properties
-        MaterialProperty texture1 = FindProperty("_Texture1", properties);
-        MaterialProperty texture2 = FindProperty("_Texture2", properties);
-        MaterialProperty texture3 = FindProperty("_Texture3", properties);
-        MaterialProperty texture4 = FindProperty("_Texture4", properties);
-        MaterialProperty texture5 = FindProperty("_Texture5", properties);
-        MaterialProperty texture6 = FindProperty("_Texture6", properties);
+        // ========================================
+        // PROPERTY RETRIEVAL
+        // ========================================
+        // Get references to all shader properties for UI display
 
-        MaterialProperty useTexture1 = FindProperty("_UseTexture1", properties);
-        MaterialProperty useTexture2 = FindProperty("_UseTexture2", properties);
-        MaterialProperty useTexture3 = FindProperty("_UseTexture3", properties);
-        MaterialProperty useTexture4 = FindProperty("_UseTexture4", properties);
-        MaterialProperty useTexture5 = FindProperty("_UseTexture5", properties);
-        MaterialProperty useTexture6 = FindProperty("_UseTexture6", properties);
+        // Texture properties
+        var texture1 = FindProperty("_Texture1", properties);
+        var texture2 = FindProperty("_Texture2", properties);
+        var texture3 = FindProperty("_Texture3", properties);
+        var texture4 = FindProperty("_Texture4", properties);
+        var texture5 = FindProperty("_Texture5", properties);
+        var texture6 = FindProperty("_Texture6", properties);
 
-        MaterialProperty color = FindProperty("_Color", properties);
-        MaterialProperty pulseSpeed = FindProperty("_PulseSpeed", properties);
-        MaterialProperty pulseIntensity = FindProperty("_PulseIntensity", properties);
-        MaterialProperty baseIntensity = FindProperty("_BaseIntensity", properties);
-        MaterialProperty starThreshold = FindProperty("_StarThreshold", properties);
-        MaterialProperty starSize = FindProperty("_StarSize", properties);
-        MaterialProperty zWrite = FindProperty("_ZWrite", properties);
-        MaterialProperty cull = FindProperty("_Cull", properties);
+        // Texture toggle properties
+        var useTexture1 = FindProperty("_UseTexture1", properties);
+        var useTexture2 = FindProperty("_UseTexture2", properties);
+        var useTexture3 = FindProperty("_UseTexture3", properties);
+        var useTexture4 = FindProperty("_UseTexture4", properties);
+        var useTexture5 = FindProperty("_UseTexture5", properties);
+        var useTexture6 = FindProperty("_UseTexture6", properties);
 
-        // Display custom UI
+        // Visual and animation properties
+        var color = FindProperty("_Color", properties);
+        var pulseSpeed = FindProperty("_PulseSpeed", properties);
+        var pulseIntensity = FindProperty("_PulseIntensity", properties);
+        var baseIntensity = FindProperty("_BaseIntensity", properties);
+        var starThreshold = FindProperty("_StarThreshold", properties);
+        var starSize = FindProperty("_StarSize", properties);
+
+        // Rendering properties
+        var zWrite = FindProperty("_ZWrite", properties);
+        var cull = FindProperty("_Cull", properties);
+
+        // ========================================
+        // TEXTURE CONFIGURATION SECTION
+        // ========================================
+        // UI for selecting and enabling star field textures
+
         EditorGUILayout.LabelField("Star Field Textures", EditorStyles.boldLabel);
-
         EditorGUILayout.BeginVertical("Box");
 
         EditorGUILayout.BeginHorizontal();
@@ -69,8 +79,12 @@ public class PulsingSkyboxShaderGUI : ShaderGUI
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.EndVertical();
-
         EditorGUILayout.Space();
+
+        // ========================================
+        // STAR APPEARANCE SECTION
+        // ========================================
+        // Controls for star visual properties
 
         EditorGUILayout.LabelField("Star Appearance", EditorStyles.boldLabel);
         EditorGUILayout.BeginVertical("Box");
@@ -78,8 +92,12 @@ public class PulsingSkyboxShaderGUI : ShaderGUI
         materialEditor.ShaderProperty(starThreshold, "Star Threshold");
         materialEditor.ShaderProperty(starSize, "Star Size");
         EditorGUILayout.EndVertical();
-
         EditorGUILayout.Space();
+
+        // ========================================
+        // ANIMATION CONTROLS SECTION
+        // ========================================
+        // Controls for pulsation and animation behavior
 
         EditorGUILayout.LabelField("Pulsation Controls", EditorStyles.boldLabel);
         EditorGUILayout.BeginVertical("Box");
@@ -87,20 +105,29 @@ public class PulsingSkyboxShaderGUI : ShaderGUI
         materialEditor.ShaderProperty(pulseIntensity, "Pulse Intensity");
         materialEditor.ShaderProperty(baseIntensity, "Base Intensity");
         EditorGUILayout.EndVertical();
-
         EditorGUILayout.Space();
+
+        // ========================================
+        // RENDERING OPTIONS SECTION
+        // ========================================
+        // Advanced rendering settings for different use cases
 
         EditorGUILayout.LabelField("Rendering Options", EditorStyles.boldLabel);
         EditorGUILayout.BeginVertical("Box");
         materialEditor.ShaderProperty(zWrite, "Z-Write (Enable for solid objects)");
         materialEditor.ShaderProperty(cull, "Culling Mode");
         EditorGUILayout.EndVertical();
-
-        // Display preset buttons for common configurations
         EditorGUILayout.Space();
+
+        // ========================================
+        // PRESET CONFIGURATIONS SECTION
+        // ========================================
+        // Quick setup buttons for common shader configurations
+
         EditorGUILayout.LabelField("Quick Presets", EditorStyles.boldLabel);
         EditorGUILayout.BeginHorizontal();
 
+        // Regular object preset - standard 3D object rendering
         if (GUILayout.Button("Regular Object"))
         {
             material.SetFloat("_ZWrite", 1);
@@ -109,6 +136,7 @@ public class PulsingSkyboxShaderGUI : ShaderGUI
             material.SetFloat("_PulseSpeed", 1.0f);
         }
 
+        // Inner skybox preset - for skybox rendering inside geometry
         if (GUILayout.Button("Inner Skybox"))
         {
             material.SetFloat("_ZWrite", 0);
@@ -117,6 +145,7 @@ public class PulsingSkyboxShaderGUI : ShaderGUI
             material.SetFloat("_PulseSpeed", 0.5f);
         }
 
+        // Dense stars preset - more visible stars with enhanced effects
         if (GUILayout.Button("Dense Stars"))
         {
             material.SetFloat("_StarThreshold", 0.5f);

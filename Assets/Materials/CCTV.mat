@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Fullscreen_CCTVEffect
+  m_Name: CCTV
   m_Shader: {fileID: 4800000, guid: 8c0a634936562ff4fa177b8aa7ce063e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -22,15 +22,20 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _ColorDesaturation: 0.6
-    - _DistortionAmount: 0.02
-    - _NoiseIntensity: 0.1
-    - _ScanlineCount: 25
-    - _ScanlineIntensity: 0.3
+    - _Desaturation: 0.8
+    - _Intensity: 1
+    - _NoiseIntensity: 0.15
+    - _ScanLineIntensity: 0.3
+    - _ShowScanLines: 1
+    - _ShowTimestamp: 1
+    - _Time: 0.35333335
     - _VignetteIntensity: 0.4
-    m_Colors:
-    - _TintColor: {r: 0.8, g: 1, b: 0.8, a: 1}
+    m_Colors: []
   m_BuildTextureStacks: []

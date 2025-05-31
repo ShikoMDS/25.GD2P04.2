@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8448410487849426282
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -20,16 +7,19 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: URP Lit Ceilings & Floors
+  m_Name: URP Lit Walls Variant
   m_Shader: {fileID: 4800000, guid: 3b5a3ec88e5bd48488dcef7c14d49ffe, type: 3}
-  m_Parent: {fileID: 2100000, guid: 813cd1ef45cafb749a5a954615de5f6d, type: 2}
-  m_ModifiedSerializedProperties: 10
+  m_Parent: {fileID: 2100000, guid: c0479481409109d4abbbf6ed60086358, type: 2}
+  m_ModifiedSerializedProperties: 26
   m_ValidKeywords:
   - _RECEIVE_SHADOWS
   - _USE_EMISSION
+  - _USE_METALLICMAP
+  - _USE_ROUGHNESSMAP
   m_InvalidKeywords:
   - _EMISSION
   - _ENABLEEMISSION
+  - _USEMETALLICWORKFLOW
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 1
@@ -42,15 +32,24 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _EmissionMap:
-        m_Texture: {fileID: 2800000, guid: cba19df8f24ab664eb6b271f8ebda3ac, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2f0de3c8e967d1e459c7e55d5e2c3058, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AlphaClip: 0
+    - _AlphaToMask: 0
+    - _BlendMode: 0
     - _Cull: 0
-    - _CullMode: 2
-    - _EnableDetail: 0
+    - _CullMode: 1
+    - _DstBlend: 0
+    - _DstBlendAlpha: 0
+    - _EmissiveStrength: 0.09
     - _Metallic: 0
+    - _ReceiveShadows: 1
+    - _SrcBlend: 1
+    - _Surface: 0
+    - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

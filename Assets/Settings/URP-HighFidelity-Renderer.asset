@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5622ba4f3dd76c641bfcb3ee5f752be1, type: 3}
   m_Name: CCTVRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   settings:
     renderPassEvent: 600
     cctvMaterial: {fileID: 2100000, guid: 410897ad0db25094ea2e5a4a4a6257d0, type: 2}

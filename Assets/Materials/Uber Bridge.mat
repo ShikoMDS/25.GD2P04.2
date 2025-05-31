@@ -7,23 +7,19 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Uber Scene Details
+  m_Name: Uber Bridge
   m_Shader: {fileID: 4800000, guid: 3b5a3ec88e5bd48488dcef7c14d49ffe, type: 3}
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
-  m_ModifiedSerializedProperties: 24
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _FORCE_UNLIT_EMISSION
   - _RECEIVE_SHADOWS
   - _USE_EMISSION
   - _USE_METALLICMAP
   - _USE_ROUGHNESSMAP
-  m_InvalidKeywords:
-  - _CULLMODE_BACK
-  - _RENDERMODE_OPAQUE
-  - _USEMETALLICWORKFLOW_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 1
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
@@ -33,44 +29,27 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: ff8c2810ee2c6854fa83e57295f51d8d, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _EmissionMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: e01f2faffe02e1945ac8620fb0d41554, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissiveMap:
-        m_Texture: {fileID: 2800000, guid: ff8c2810ee2c6854fa83e57295f51d8d, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: ff8c2810ee2c6854fa83e57295f51d8d, type: 3}
+        m_Texture: {fileID: 2800000, guid: e01f2faffe02e1945ac8620fb0d41554, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicMap:
-        m_Texture: {fileID: 2800000, guid: 36d673d165131474b8c1544250bd12f6, type: 3}
+        m_Texture: {fileID: 2800000, guid: b2e7f6f26a8f60146b36cdbcb55fbde6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RoughnessMap:
-        m_Texture: {fileID: 2800000, guid: 5f41baef2f650d541b24ccdfe8fe2555, type: 3}
+        m_Texture: {fileID: 2800000, guid: 91cc80b1cce120e4fa2a71b6e6cd11fa, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1
-    - _BlendMode: 0
     - _CullMode: 0
-    - _DstBlend: 0
-    - _EmissionStrength: 1
+    - _EmissiveStrength: 0.45
     - _EnableEmission: 1
     - _EnableMetallic: 1
     - _EnableRoughness: 1
-    - _Metallic: 0
-    - _PulseIntensity: 0.5
-    - _PulseSpeed: 0
-    - _SrcBlend: 1
-    - _UnlitEmission: 1
-    - _ZWrite: 1
     m_Colors: []
   m_BuildTextureStacks: []
