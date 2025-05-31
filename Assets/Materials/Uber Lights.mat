@@ -53,11 +53,11 @@ Material:
     - _Cutoff: 1
     - _DstBlend: 10
     - _EmissionStrength: 0.63
-    - _EmissiveStrength: 7.18
+    - _EmissiveStrength: 7.3
     - _EnableEmission: 1
     - _EnableMetallic: 0
     - _Metallic: 0
-    - _PulseAmplitude: 0.45
+    - _PulseAmplitude: 0.6
     - _PulseIntensity: 5.3
     - _PulseSpeed: 2
     - _SrcBlend: 5

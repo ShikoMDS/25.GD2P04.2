@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7144610891653146750
+--- !u!114 &-5551652175280309593
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,20 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fe2d20fee63e304299401b9fc1c70fc, type: 3}
-  m_Name: CCTVFullscreenFeature
+  m_Script: {fileID: 11500000, guid: 5622ba4f3dd76c641bfcb3ee5f752be1, type: 3}
+  m_Name: CCTVRenderFeature
   m_EditorClassIdentifier: 
   m_Active: 0
   settings:
-    scanlineIntensity: 0.15
-    scanlineCount: 40
-    vignetteIntensity: 0.25
-    noiseIntensity: 0.08
-    distortionAmount: 0.005
-    colorDesaturation: 1
-    tintColor: {r: 1, g: 0.4, b: 0.2, a: 1}
     renderPassEvent: 600
-    cctvShader: {fileID: 4800000, guid: 8c0a634936562ff4fa177b8aa7ce063e, type: 3}
+    cctvMaterial: {fileID: 2100000, guid: 410897ad0db25094ea2e5a4a4a6257d0, type: 2}
 --- !u!114 &-5108321404941335206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,9 +96,9 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
-  - {fileID: -7144610891653146750}
-  m_RendererFeatureMap: adc0de57c6d2eee58297a0703f3ed99c
-  m_UseNativeRenderPass: 1
+  - {fileID: -5551652175280309593}
+  m_RendererFeatureMap: adc0de57c6d2eee5a77ae4afc291f4b2
+  m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:

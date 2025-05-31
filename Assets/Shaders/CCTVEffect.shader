@@ -1,152 +1,189 @@
-Shader "Fullscreen/CCTVEffect"
+Shader "Custom/CCTV"
 {
     Properties
     {
-        _ScanlineIntensity ("Scanline Intensity", Range(0, 1)) = 0.3
-        _ScanlineCount ("Scanline Count", Range(1, 50)) = 25
+        _MainTex ("Texture", 2D) = "white" {}
+        _Intensity ("Effect Intensity", Range(0, 1)) = 1
+        _ScanLineIntensity ("Scan Line Intensity", Range(0, 1)) = 0.3
+        _NoiseIntensity ("Noise Intensity", Range(0, 1)) = 0.15
+        _Desaturation ("Desaturation", Range(0, 1)) = 0.8
         _VignetteIntensity ("Vignette Intensity", Range(0, 1)) = 0.4
-        _NoiseIntensity ("Noise Intensity", Range(0, 1)) = 0.1
-        _DistortionAmount ("Distortion Amount", Range(0, 1)) = 0.02
-        _ColorDesaturation ("Color Desaturation", Range(0, 1)) = 0.6
-        _TintColor ("Tint Color", Color) = (0.8, 1, 0.8, 1)
+        _Time ("Time", Float) = 0
+        _ShowTimestamp ("Show Timestamp", Float) = 1
+        _ShowScanLines ("Show Scan Lines", Float) = 1
     }
-
+    
     SubShader
     {
-        Tags 
-        { 
-            "RenderType" = "Opaque" 
-            "RenderPipeline" = "UniversalPipeline"
-        }
-        
+        Tags { "RenderType"="Opaque" "RenderPipeline"="UniversalPipeline" }
+        LOD 100
         ZWrite Off
         ZTest Always
-        Blend Off
         Cull Off
 
         Pass
         {
-            Name "CCTVFullscreenPass"
-
+            Name "CCTV"
+            
             HLSLPROGRAM
-            #pragma vertex Vert
+            #pragma vertex vert
             #pragma fragment frag
-            #pragma target 3.5
-            #pragma multi_compile_fragment _ _LINEAR_TO_SRGB_CONVERSION
             
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+            
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+            };
 
-            CBUFFER_START(UnityPerMaterial)
-                float _ScanlineIntensity;
-                float _ScanlineCount;
-                float _VignetteIntensity;
-                float _NoiseIntensity;
-                float _DistortionAmount;
-                float _ColorDesaturation;
-                float4 _TintColor;
-            CBUFFER_END
+            struct Varyings
+            {
+                float2 uv : TEXCOORD0;
+                float4 positionHCS : SV_POSITION;
+            };
 
-            // Random function for noise generation
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+            
+            float _Intensity;
+            float _ScanLineIntensity;
+            float _NoiseIntensity;
+            float _Desaturation;
+            float _VignetteIntensity;
+            float _ShowTimestamp;
+            float _ShowScanLines;
+
+            Varyings vert(Attributes input)
+            {
+                Varyings output;
+                output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
+                output.uv = input.uv;
+                return output;
+            }
+
+            // Noise function
             float random(float2 st)
             {
                 return frac(sin(dot(st.xy, float2(12.9898, 78.233))) * 43758.5453123);
             }
 
-            // Improved noise function
-            float noise(float2 st)
+            // Generate timestamp digits
+            float drawDigit(float2 uv, int digit, float2 pos, float scale)
             {
-                float2 i = floor(st);
-                float2 f = frac(st);
+                float2 digitUV = (uv - pos) / scale;
+                if (digitUV.x < 0 || digitUV.x > 1 || digitUV.y < 0 || digitUV.y > 1) return 0;
                 
-                float a = random(i);
-                float b = random(i + float2(1.0, 0.0));
-                float c = random(i + float2(0.0, 1.0));
-                float d = random(i + float2(1.0, 1.0));
+                // Simple 7-segment display patterns
+                float segments[10 * 7] = {
+                    // 0
+                    1, 1, 1, 0, 1, 1, 1,
+                    // 1
+                    0, 0, 1, 0, 0, 1, 0,
+                    // 2
+                    1, 0, 1, 1, 1, 0, 1,
+                    // 3
+                    1, 0, 1, 1, 0, 1, 1,
+                    // 4
+                    0, 1, 1, 1, 0, 1, 0,
+                    // 5
+                    1, 1, 0, 1, 0, 1, 1,
+                    // 6
+                    1, 1, 0, 1, 1, 1, 1,
+                    // 7
+                    1, 0, 1, 0, 0, 1, 0,
+                    // 8
+                    1, 1, 1, 1, 1, 1, 1,
+                    // 9
+                    1, 1, 1, 1, 0, 1, 1
+                };
                 
-                float2 u = f * f * (3.0 - 2.0 * f);
+                // Simplified digit rendering
+                float intensity = 0;
+                if (digitUV.y > 0.8 && segments[digit * 7 + 0] > 0.5) intensity = 1; // top
+                if (digitUV.x < 0.2 && digitUV.y > 0.5 && segments[digit * 7 + 1] > 0.5) intensity = 1; // top-left
+                if (digitUV.x > 0.8 && digitUV.y > 0.5 && segments[digit * 7 + 2] > 0.5) intensity = 1; // top-right
+                if (digitUV.y > 0.4 && digitUV.y < 0.6 && segments[digit * 7 + 3] > 0.5) intensity = 1; // middle
+                if (digitUV.x < 0.2 && digitUV.y < 0.5 && segments[digit * 7 + 4] > 0.5) intensity = 1; // bottom-left
+                if (digitUV.x > 0.8 && digitUV.y < 0.5 && segments[digit * 7 + 5] > 0.5) intensity = 1; // bottom-right
+                if (digitUV.y < 0.2 && segments[digit * 7 + 6] > 0.5) intensity = 1; // bottom
                 
-                return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+                return intensity;
             }
 
-            // Apply barrel distortion
-            float2 applyBarrelDistortion(float2 uv, float distortionAmount)
+            float4 frag(Varyings input) : SV_Target
             {
-                float2 center = uv - 0.5;
-                float distortion = dot(center, center);
-                return uv + center * distortion * distortionAmount;
-            }
-
-            // Calculate vignette effect
-            float calculateVignette(float2 uv, float intensity)
-            {
-                float2 vignetteUV = uv * (1.0 - uv.yx);
-                float vignette = vignetteUV.x * vignetteUV.y * 15.0;
-                vignette = pow(saturate(vignette), 0.25);
-                return lerp(vignette, 1.0, 1.0 - intensity);
-            }
-
-            // Generate scanlines
-            float generateScanlines(float2 uv, float intensity, float count)
-            {
-                float scanline = sin(uv.y * count * PI) * 0.5 + 0.5;
-                scanline = pow(scanline, 2.0);
-                return lerp(1.0, scanline, intensity);
-            }
-
-            half4 frag(Varyings input) : SV_Target
-            {
-                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                float2 uv = input.uv;
+                float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
                 
-                float2 uv = input.texcoord;
+                // Apply desaturation
+                float gray = dot(color.rgb, float3(0.299, 0.587, 0.114));
+                color.rgb = lerp(color.rgb, float3(gray, gray, gray), _Desaturation);
                 
-                // Apply barrel distortion first
-                float2 distortedUV = applyBarrelDistortion(uv, _DistortionAmount);
+                // Add slight green tint (typical CCTV look)
+                color.rgb *= float3(0.9, 1.1, 0.8);
                 
-                // Sample the source texture
-                half4 col = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, distortedUV);
+                // Scan lines
+                if (_ShowScanLines > 0.5)
+                {
+                    float scanLine = sin(uv.y * 800.0) * 0.5 + 0.5;
+                    scanLine = pow(scanLine, 8.0);
+                    color.rgb *= 1.0 - scanLine * _ScanLineIntensity;
+                }
                 
-                // Desaturate the image
-                float luminance = dot(col.rgb, float3(0.299, 0.587, 0.114));
-                col.rgb = lerp(col.rgb, luminance.xxx, _ColorDesaturation);
+                // Noise
+                float noise = random(uv + _Time * 0.1) * 2.0 - 1.0;
+                color.rgb += noise * _NoiseIntensity;
                 
-                // Apply color tint
-                col.rgb *= _TintColor.rgb;
+                // Vignette
+                float2 vignetteUV = uv * 2.0 - 1.0;
+                float vignette = 1.0 - dot(vignetteUV, vignetteUV) * _VignetteIntensity;
+                color.rgb *= vignette;
                 
-                // Add scanlines
-                col.rgb *= generateScanlines(uv, _ScanlineIntensity, _ScanlineCount);
+                // Timestamp overlay
+                if (_ShowTimestamp > 0.5)
+                {
+                    float time = _Time;
+                    int hours = int(time / 3600.0) % 24;
+                    int minutes = int(time / 60.0) % 60;
+                    int seconds = int(time) % 60;
+                    
+                    float timestamp = 0;
+                    float digitScale = 0.02;
+                    float2 startPos = float2(0.02, 0.9);
+                    
+                    // Draw time digits (simplified)
+                    timestamp += drawDigit(uv, hours / 10, startPos, digitScale);
+                    timestamp += drawDigit(uv, hours % 10, startPos + float2(0.03, 0), digitScale);
+                    timestamp += drawDigit(uv, minutes / 10, startPos + float2(0.08, 0), digitScale);
+                    timestamp += drawDigit(uv, minutes % 10, startPos + float2(0.11, 0), digitScale);
+                    timestamp += drawDigit(uv, seconds / 10, startPos + float2(0.16, 0), digitScale);
+                    timestamp += drawDigit(uv, seconds % 10, startPos + float2(0.19, 0), digitScale);
+                    
+                    // Add colon separators
+                    if (uv.x > 0.065 && uv.x < 0.075 && ((uv.y > 0.92 && uv.y < 0.925) || (uv.y > 0.905 && uv.y < 0.91)))
+                        timestamp = 1;
+                    if (uv.x > 0.135 && uv.x < 0.145 && ((uv.y > 0.92 && uv.y < 0.925) || (uv.y > 0.905 && uv.y < 0.91)))
+                        timestamp = 1;
+                    
+                    color.rgb = lerp(color.rgb, float3(1, 1, 1), timestamp * 0.8);
+                }
                 
-                // Apply vignette
-                col.rgb *= calculateVignette(uv, _VignetteIntensity);
+                // Add recording indicator
+                float2 recUV = uv - float2(0.95, 0.95);
+                float recDot = length(recUV);
+                if (recDot < 0.01)
+                {
+                    float blink = sin(_Time * 3.0) * 0.5 + 0.5;
+                    color.rgb = lerp(color.rgb, float3(1, 0, 0), blink);
+                }
                 
-                // Add spatial noise
-                float spatialNoise = noise(uv * 100.0 + _Time * 5.0);
-                col.rgb += (spatialNoise - 0.5) * _NoiseIntensity * 0.1;
+                // Apply overall intensity
+                color.rgb = lerp(SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb, color.rgb, _Intensity);
                 
-                // Add temporal noise for that authentic camera feel
-                float temporalNoise = random(uv + frac(_Time * 0.1));
-                col.rgb += (temporalNoise - 0.5) * _NoiseIntensity * 0.05;
-                
-                // Add subtle flickering
-                float flicker = sin(_Time * 60.0) * 0.005 + 1.0;
-                col.rgb *= flicker;
-                
-                // Add occasional horizontal interference lines
-                float interference = step(0.995, random(float2(uv.y * 100.0, floor(_Time * 10.0))));
-                col.rgb += interference * 0.1;
-                
-                // Ensure proper color range
-                col.rgb = saturate(col.rgb);
-                
-                #ifdef _LINEAR_TO_SRGB_CONVERSION
-                col.rgb = LinearToSRGB(col.rgb);
-                #endif
-                
-                return col;
+                return color;
             }
             ENDHLSL
         }
     }
-    
-    Fallback Off
 }

@@ -425,7 +425,7 @@ Shader "Custom/UberShaderEnhanced"
             // Shadow bias parameters
             float3 _LightDirection;
             float3 _LightPosition;
-            float4 _ShadowBias; // x: depth bias, y: normal bias
+            //float4 _ShadowBias; // x: depth bias, y: normal bias
 
             // Need to declare our properties for shadow pass
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);

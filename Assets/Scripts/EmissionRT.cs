@@ -28,7 +28,7 @@ public class EmissionRT : MonoBehaviour
         if (mat == null || !mat.HasProperty(strengthProperty)) return;
 
         float pulseSpeed = mat.GetFloat(pulseSpeedProperty);
-        float strength = mat.GetFloat(strengthProperty) / 8;
+        float strength = mat.GetFloat(strengthProperty) / 4;
         Color color = mat.GetColor(colorProperty);
 
         float pulse = 1 + Mathf.Sin(Time.time * pulseSpeed);

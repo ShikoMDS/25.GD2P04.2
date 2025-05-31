@@ -12,6 +12,7 @@ Material:
   m_Parent: {fileID: 2100000, guid: dbe8851e15f09504cad45838372e1f43, type: 2}
   m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
+  - _ALPHABLEND_ON
   - _RECEIVE_SHADOWS
   - _USE_EMISSION
   - _USE_METALLICMAP
@@ -23,9 +24,9 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2000
   stringTagMap:
-    RenderType: Opaque
+    RenderType: Transparent
   disabledShaderPasses: []
   m_LockedProperties: _AlphaTest
   m_SavedProperties:
@@ -64,13 +65,13 @@ Material:
     - _Alpha: 1
     - _AlphaTest: 0
     - _AmbientDarkening: 0.294
-    - _BlendMode: 0
+    - _BlendMode: 1
     - _ColorIntensity: 0.98
     - _CullMode: 0
     - _Cutoff: 0
     - _DarkeningThreshold: 0.098
     - _DetailStrength: 1
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _EmissionStrength: 0
     - _EnableEmission: 1
     - _EnableMetallic: 1
@@ -83,7 +84,7 @@ Material:
     - _ReceiveShadows: 1
     - _Roughness: 0.3
     - _ShadowStrength: 1.28
-    - _SrcBlend: 1
+    - _SrcBlend: 5
     - _UnlitEmission: 0
     - _UseEmission: 0
     - _UseMetallicMap: 0
